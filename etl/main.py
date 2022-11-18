@@ -1,0 +1,26 @@
+from etl import extract_lobster_data, extract_cei_data, extract_sea_surface_temperature_data
+from mlr_model import create_design_matrix, create_single_design_matrix, predict_from_design
+
+def main():
+    years, lobsters, water_temp = extract_lobster_data()
+    cei                         = extract_cei_data()
+    sea_max, sea_min, sea_avg   = extract_sea_surface_temperature_data()
+
+    # design_matrix = create_design_matrix(cei, sea_max, sea_min, sea_avg).to_numpy()
+    design_matrix = create_single_design_matrix(cei)
+    print(design_matrix)
+
+    beta_hat, y_hat, r = predict_from_design(design_matrix, lobsters)
+
+    '''
+    print(f'\n{years}')
+    print(f'\n{lobsters}')
+    print(f'\n{cei}')
+    print(f'\n{sea_max}')
+    print(f'\n{sea_min}')
+    print(f'\n{sea_avg}')
+    '''
+
+
+if __name__ == "__main__":
+    main()
