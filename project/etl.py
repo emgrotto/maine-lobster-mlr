@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def extract_lobster_data():
     print("\nExtracting Lobster Data from: https://www.maine.gov/dmr/fisheries/commercial/landings-data")
@@ -59,9 +60,30 @@ def extract_sea_surface_temperature_data():
         inplace=True
     )
 
+    sea_df['Year'] = sea_df['Date'].apply(lambda date: date.split('/')[-1])
+
     # reducing all data to average by year
-    df_average_sea_by_year = sea_df.groupby(sea_df['Date'].map(lambda x: x.split('/')[-1]), as_index=False).mean()
-    
+    df_sea_average_by_year = sea_df.groupby('Year').agg(
+        Mean=('Avg', np.median),
+        Min=('Min', np.median),
+        Max=('Max', np.median)
+    )
+
+    df_sea_average_by_year['Range'] = df_sea_average_by_year['Max'] - df_sea_average_by_year['Min']
+    print('\nDataframe average by year')
+    print(df_sea_average_by_year)
+
+    # reducing all data to average by year
+    df_sea_by_year = sea_df.groupby('Year').agg(
+        Mean=('Avg', np.mean),
+        Min=('Min', np.min),
+        Max=('Max', np.max)
+    )
+
+    df_sea_by_year['Range'] = df_sea_by_year['Max'] - df_sea_by_year['Min']
+    print('\nDataframe by year')
+    print(df_sea_by_year)
+
     # Data already between desired dates
 
-    return df_average_sea_by_year['Max'].tolist(), df_average_sea_by_year['Min'].tolist(), df_average_sea_by_year['Avg'].tolist()
+    return df_sea_average_by_year['Max'].tolist(), df_sea_average_by_year['Min'].tolist(), df_sea_average_by_year['Mean'].tolist(), df_sea_by_year['Max'].tolist(), df_sea_by_year['Min'].tolist(), df_sea_by_year['Range'].tolist()

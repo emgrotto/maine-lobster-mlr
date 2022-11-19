@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
 
-def create_design_matrix(cei, sea_max, sea_min, sea_avg):
+def create_design_matrix(cei, sea_max, sea_min, sea_range):
     number_obs = len(cei)
     print(f"\nCreating the Desgin matrix for the {number_obs} observations")
 
     ones = [1 for i in range(number_obs)]
 
-    sea_df = pd.DataFrame(list(zip(ones, cei, sea_max, sea_min, sea_avg)),
-                columns =['ones', 'cei', 'sea_max', 'sea_min', 'sea_avg'])
+    sea_df = pd.DataFrame(list(zip(ones, cei, sea_max, sea_min, sea_range)),
+                columns =['ones', 'cei', 'sea_max', 'sea_min', 'sea_range'])
 
     return sea_df
 

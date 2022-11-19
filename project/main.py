@@ -4,10 +4,11 @@ from mlr_model import create_design_matrix, create_single_design_matrix, predict
 def main():
     years, lobsters, water_temp = extract_lobster_data()
     cei                         = extract_cei_data()
-    sea_max, sea_min, sea_avg   = extract_sea_surface_temperature_data()
 
-    # design_matrix = create_design_matrix(cei, sea_max, sea_min, sea_avg).to_numpy()
-    design_matrix = create_single_design_matrix(cei)
+    sea_avg_max, sea_avg_min, sea_avg_avg, sea_max_max, sea_min_min, sea_max_range = extract_sea_surface_temperature_data()
+
+    # design_matrix_full = create_design_matrix(cei).to_numpy()
+    design_matrix = create_single_design_matrix(water_temp)
     print(design_matrix)
 
     beta_hat, y_hat, r = predict_from_design(design_matrix, lobsters)
