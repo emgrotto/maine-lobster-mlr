@@ -1,2 +1,1 @@
-docker build -t lobster .
-docker run lobster
+python3 project/main.py
