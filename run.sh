@@ -1,1 +1,1 @@
-python3 project/main.py
+python3 -W ignore project/main.py

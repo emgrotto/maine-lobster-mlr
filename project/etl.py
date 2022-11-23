@@ -70,8 +70,8 @@ def extract_sea_surface_temperature_data():
     )
 
     df_sea_average_by_year['Range'] = df_sea_average_by_year['Max'] - df_sea_average_by_year['Min']
-    print('\nDataframe average by year')
-    print(df_sea_average_by_year)
+    # print('\nDataframe average by year')
+    # print(df_sea_average_by_year)
 
     # reducing all data to average by year
     df_sea_by_year = sea_df.groupby('Year').agg(
@@ -81,8 +81,8 @@ def extract_sea_surface_temperature_data():
     )
 
     df_sea_by_year['Range'] = df_sea_by_year['Max'] - df_sea_by_year['Min']
-    print('\nDataframe by year')
-    print(df_sea_by_year)
+    # print('\nDataframe by year')
+    # print(df_sea_by_year)
 
     # Data already between desired dates
 
