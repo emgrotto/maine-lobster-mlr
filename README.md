@@ -12,3 +12,5 @@ To run the project using Docker:
 docker build -t lobster .
 docker run lobster
 ```
+
+I have added the results of the most recent execution of the project in the [results.txt][./results.txt]

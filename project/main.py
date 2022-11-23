@@ -5,7 +5,7 @@ from pandas.plotting import scatter_matrix
 
 def scatterplot_matrix(design_matrix):
     scatter = scatter_matrix(design_matrix, alpha = 0.6, figsize = (7.5, 7.5), diagonal = 'kde')
-    plt.savefig('scatter.png')
+    plt.savefig('paper_resources/scatter_matrix.png')
 
 def main():
     years, lobsters, water_temp = extract_lobster_data()
@@ -25,7 +25,7 @@ def main():
     ax.scatter(years, residuals, s=2, c="r")
     ax.set(xlabel='years', ylabel='mlr residuals',
         title='residuals from mlr by year')
-    plt.savefig('mlr_residuals.png')
+    plt.savefig('paper_resources/mlr_residuals.png')
 
     results_insights(XtXinv, residuals, lobsters, beta_hat, n_preds)
     naive_beta_hat, naive_y_hat, naive_r = predict_naive_model(design_matrix_full, beta_hat, lobsters)
@@ -33,7 +33,7 @@ def main():
     ax.scatter(years, naive_r, s=2, c="r")
     ax.set(xlabel='years', ylabel='naive residuals',
         title='residuals from naive model by year')
-    plt.savefig('naive_residuals.png')
+    plt.savefig('paper_resources/naive_residuals.png')
 
     F = f_test(naive_r, residuals, 1, n_preds+1, n_obs) # -> are these ps correct, looking from https://en.wikipedia.org/wiki/F-test
 
