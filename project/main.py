@@ -12,8 +12,8 @@ def main():
 
     print(f"\nCreating the Desgin matrix for the {number_obs} observations")
     ones = [1 for i in range(number_obs)]
-    design_matrix_full = pd.DataFrame(list(zip(ones, cei, sea_avg_max, sea_avg_min, sea_max_range)),
-                columns =['ones', 'cei', 'sea_avg_max', 'sea_avg_min', 'sea_max_range'])
+    design_matrix_full = pd.DataFrame(list(zip(ones, cei, sea_avg_max, sea_avg_min, sea_max_range, years, water_temp)),
+                columns =['ones', 'cei', 'sea_avg_max', 'sea_avg_min', 'sea_max_range', 'years', 'water_temp'])
     n_obs,n_preds = np.shape(design_matrix_full)
     print(design_matrix_full)
 
@@ -97,7 +97,7 @@ def main():
     # Note:
     # np.corrcoef(np.transpose(P))
 
-    pstar = 2
+    pstar = 3 # why are the z scores a lot lower for just 2 
     print(f'\nUsing {pstar} principle components')
     P = P.iloc[:,:pstar]
     print(P)
