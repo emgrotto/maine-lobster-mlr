@@ -12,8 +12,8 @@ def main():
 
     print(f"\nCreating the Desgin matrix for the {number_obs} observations")
     ones = [1 for i in range(number_obs)]
-    design_matrix_full = pd.DataFrame(list(zip(ones, cei, sea_avg_max, sea_avg_min, sea_max_range, years, water_temp)),
-                columns =['ones', 'cei', 'sea_avg_max', 'sea_avg_min', 'sea_max_range', 'years', 'water_temp'])
+    design_matrix_full = pd.DataFrame(list(zip(ones, cei, sea_avg_max, sea_avg_min, sea_max_range, years)),
+                columns =['ones', 'cei', 'sea_avg_max', 'sea_avg_min', 'sea_max_range', 'years'])
     n_obs,n_preds = np.shape(design_matrix_full)
     print(design_matrix_full)
 
@@ -31,7 +31,7 @@ def main():
     XtXinv = np.linalg.inv(XtX)
     beta_hat = np.matmul(XtXinv,Xty)
     print(beta_hat)
-    
+
     print('\nPredicting Lobster Landings')
     y_hat = np.matmul(X,beta_hat)
     print(y_hat)
@@ -75,6 +75,13 @@ def main():
     Xtilde = X - X.mean()
     print(Xtilde)
 
+    print('\nVerifying centering')
+    print(Xtilde.sum())
+
+    print('\nCalcultaing the Sample Covariance matrix')
+    S = (np.matmul(np.transpose(Xtilde), Xtilde))/(n_obs - 1)
+    print(S)
+
     print('\nComputing the singular value decomposision')
     U,d,Vt = np.linalg.svd(Xtilde,full_matrices=False)
     print(Vt)
@@ -92,12 +99,13 @@ def main():
     print('\nComputing the singular vectors')
     P = np.matmul(Xtilde,np.transpose(Vt))
     print(P)
+
     # Note:
     # np.matmul(U,np.diag(d))-np.matmul(Xtilde,np.transpose(Vt))
     # Note:
     # np.corrcoef(np.transpose(P))
 
-    pstar = 3 # why are the z scores a lot lower for just 2 
+    pstar = 2 
     print(f'\nUsing {pstar} principle components')
     P = P.iloc[:,:pstar]
     print(P)
@@ -120,14 +128,18 @@ def main():
     sig2_hat_tilde = np.dot(rtilde,rtilde)/(n_obs-(pstar+1))
     print(sig2_hat_tilde)
 
-    print('\nCalculating z scores')
-    gamma_hat_var_tilde = sig2_hat_tilde*np.diag(PtPinv)
-    zscore_tidle = gamma_hat/np.sqrt(gamma_hat_var_tilde)
-    print(zscore_tidle)
+    print('\nCalculating total variability in centered target variable')
+    s2tilde = np.var(ytilde)
+    print(s2tilde)
 
     print('\nexplained variability using pstar principal comps')
     R2_pc = 1-(n_obs-(pstar+1))*sig2_hat_tilde/((n_obs-1)*s2)
     print(R2_pc)
+
+    print('\nCalculating z scores')
+    gamma_hat_var = sig2_hat_tilde*np.diag(PtPinv)
+    zscore_gamma = gamma_hat/np.sqrt(gamma_hat_var)
+    print(zscore_gamma)
 
 
 if __name__ == "__main__":
