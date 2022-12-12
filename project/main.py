@@ -1,5 +1,4 @@
 from etl import *
-from mlr_model import * 
 import matplotlib.pyplot as plt
 from pandas.plotting import scatter_matrix
 
@@ -12,16 +11,27 @@ def main():
 
     print(f"\nCreating the Desgin matrix for the {number_obs} observations")
     ones = [1 for i in range(number_obs)]
-    design_matrix_full = pd.DataFrame(list(zip(ones, cei, sea_avg_max, sea_avg_min, sea_max_range, years)),
-                columns =['ones', 'cei', 'sea_avg_max', 'sea_avg_min', 'sea_max_range', 'years'])
+    design_matrix_full = pd.DataFrame(list(zip(ones, cei, sea_avg_max, sea_avg_min, sea_max_range)),
+                columns =['ones', 'cei', 'sea_avg_max', 'sea_avg_min', 'sea_max_range'])
     n_obs,n_preds = np.shape(design_matrix_full)
     print(design_matrix_full)
+
+    # print('\nnormalizing the design matrix')
+    # design_matrix_norm = (design_matrix_full - design_matrix_full.mean()) / design_matrix_full.std()
+    # print(design_matrix_norm)
+
+    # design_matrix_full = design_matrix_norm
+    # design_matrix_full['ones'] = ones
+
+    _, eigenvalues, _ = np.linalg.svd(design_matrix_full.values)
+
+    print(f'Design matrix is positive definite: \n {eigenvalues}')
 
     print('\nPlotting the scatter matrix for the design matrix')
     scatter_matrix(design_matrix_full.iloc[:, 1:n_preds+1], alpha = 0.6, figsize = (7.5, 7.5), diagonal = 'kde')
     plt.savefig('paper_resources/scatter_matrix.png')
 
-    X = design_matrix_full
+    X = design_matrix_full.copy()
     y = lobsters
 
     print('\nCalculating parameter estimates')
@@ -46,17 +56,36 @@ def main():
 
     print('\nPlotting the residuals')
     fig, ax = plt.subplots()
-    ax.scatter(years, residuals, s=2, c="r")
-    ax.set(xlabel='years', ylabel='mlr residuals',
-        title='residuals from mlr by year')
+    scatter = ax.scatter(years, residuals, s=2, c="b")
+    scatter.set_label('Residuals')
+    ax.legend()
+
+    year_2004_index = years.index(2004) # in 2004, lobster reporting became mandatory
+    years_to_2004 = years[:year_2004_index+1]
+    residuals_to_2004 = residuals[:year_2004_index+1]
+    a1, b1 = np.polyfit(years_to_2004, residuals_to_2004, 1)
+    years_to_2004_array = np.array(years_to_2004)
+    line1, = ax.plot(years_to_2004_array, a1*years_to_2004_array+b1, c='m')
+    line1.set_label('Best fit for years up to 2004')
+    ax.legend()
+
+    years_since_2004 = years[year_2004_index+1:]
+    residuals_since_2004 = residuals[year_2004_index+1:]
+    a2, b2 = np.polyfit(years_since_2004, residuals_since_2004, 1)
+    years_since_2004_array = np.array(years_since_2004)
+    line2, = ax.plot(years_since_2004_array, a2*years_since_2004_array+b2, c='tab:orange')
+    line2.set_label('Best fit for years after 2004')
+    ax.legend()
+
+    ax.set(xlabel='Years', ylabel='Residuals')
     plt.savefig('paper_resources/mlr_residuals.png')
 
     print('\nCalculating sigma squared estimates')
-    sigma2_hat = np.dot(residuals,residuals)/(n_obs-(n_preds+1))
+    sigma2_hat = np.dot(residuals,residuals)/(n_obs-(n_preds+1)) # using residuals as population
     print(sigma2_hat)
 
-    print('\nCalculating z scores')
-    beta_hat_var = sigma2_hat*np.diag(XtXinv)
+    print('\nCalculating z scores') 
+    beta_hat_var = sigma2_hat*np.diag(XtXinv) # np.diag returns just the diagonals of a Matrix)
     zscore = beta_hat/np.sqrt(beta_hat_var)
     print(zscore)
 
@@ -69,10 +98,11 @@ def main():
     print(R2)
 
     ### Data Reduction 
+    Xtilde = X.copy().iloc[:,1:]
     print('\nMeans of the design matrix')
-    print(X.mean())
+    print(Xtilde.mean())
     print('\nCentering the design matrix')
-    Xtilde = X - X.mean()
+    Xtilde = Xtilde - Xtilde.mean()
     print(Xtilde)
 
     print('\nVerifying centering')
@@ -87,11 +117,12 @@ def main():
     print(Vt)
 
     # Xtilde-np.matmul(np.matmul(U,np.diag(d)),Vt)
+
     print('\nPlotting a scree plot')
     d_index = [i for i in range(len(d))]
     fig, ax = plt.subplots()
-    ax.scatter(d_index, d, s=3, c="b")
-    ax.set(xlabel='', ylabel='eigenvalues',
+    ax.scatter(d_index, d, s=25, c="b")
+    ax.set(xlabel='', ylabel='',
         title='Scree Plot of Singular Values')
     plt.savefig('paper_resources/scree_plot.png')
 
@@ -99,6 +130,7 @@ def main():
     print('\nComputing the singular vectors')
     P = np.matmul(Xtilde,np.transpose(Vt))
     print(P)
+    print(d)
 
     # Note:
     # np.matmul(U,np.diag(d))-np.matmul(Xtilde,np.transpose(Vt))
@@ -117,6 +149,7 @@ def main():
     Ptytilde = np.matmul(Pt,ytilde)
     PtPinv = np.linalg.inv(PtP)
     gamma_hat = np.matmul(PtPinv,Ptytilde)
+    print(gamma_hat)
 
     print('\nPredicting centered target values')
     yhat_tilde = np.matmul(P,gamma_hat)
@@ -133,7 +166,7 @@ def main():
     print(s2tilde)
 
     print('\nexplained variability using pstar principal comps')
-    R2_pc = 1-(n_obs-(pstar+1))*sig2_hat_tilde/((n_obs-1)*s2)
+    R2_pc = 1-(n_obs-(pstar+1))*sig2_hat_tilde/((n_obs-1)*s2tilde)
     print(R2_pc)
 
     print('\nCalculating z scores')
