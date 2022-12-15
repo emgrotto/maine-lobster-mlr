@@ -1,5 +1,6 @@
 from etl import *
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from pandas.plotting import scatter_matrix
 
 
@@ -119,11 +120,11 @@ def main():
     # Xtilde-np.matmul(np.matmul(U,np.diag(d)),Vt)
 
     print('\nPlotting a scree plot')
-    d_index = [i for i in range(len(d))]
+    d_index = [i+1 for i in range(len(d))]
     fig, ax = plt.subplots()
     ax.scatter(d_index, d, s=25, c="b")
-    ax.set(xlabel='', ylabel='',
-        title='Scree Plot of Singular Values')
+    ax.set(xlabel='singular value', ylabel='magnitude of singular value')
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.savefig('paper_resources/scree_plot.png')
 
 
